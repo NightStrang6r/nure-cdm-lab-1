@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Lab #1</title>
+        <style>
+            h2 {
+                margin: 1px;
+            }
+            h3 {
+                margin: 1px;
+            }
+        </style>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	</head>
+	<body>
+        <h1>Input</h1>
+        <h2><b>Set A:</b></h2><br>
+        <input id="inputA" type="text" size="40" oninput="update()">
+        <h2><b>Set B:</b></h2><br>
+        <input id="inputB" type="text" size="40" oninput="update()">
+        <h2><b>Set C:</b></h2><br>
+        <input id="inputC" type="text" size="40" oninput="update()">
+        <h2><b>Set U:</b></h2><br>
+        <input id="inputU" type="text" size="40" oninput="update()">
+        <h2><b>Formula:</b></h2><br>
+        <div>You can use names of sets, brackets, "I" for interseption, "U" for union, "~" for complement and "-" for difference</div>
+        <input id="inputF" type="text" size="40" oninput="update()"><br><br>
+        
+        <h1>Output</h1>
+        <h2><b>Set A:</b></h2>
+        <h3 id="outputA"></h3>
+        <h2><b>Set B:</b></h2>
+        <h3 id="outputB"></h3>
+        <h2><b>Set C:</b></h2>
+        <h3 id="outputC"></h3>
+        <h2><b>Set U:</b></h2>
+        <h3 id="outputU"></h3>
+
+        <h1>Union</h1>
+        <h2><b>A union B:</b></h2>
+        <h3 id="AuB"></h3>
+
+        <h1>Intersection</h1>
+        <h2><b>A intersection B:</b></h2>
+        <h3 id="AiB"></h3>
+
+        <h1>Complement</h1>
+        <h2><b>A complement U:</b></h2>
+        <h3 id="AcU"></h3>
+
+        <h1>Difference</h1>
+        <h2><b>A difference B:</b></h2>
+        <h3 id="AdB"></h3>
+
+        <h1>Formula</h1>
+        <h3 id="error"></h3>
+        <h3 id="formula"></h3>
+		<script>
+			let inputA, inputB, inputC, inputU, outputA, outputB, outputC, outputU, AuB, AiB, AcU, outputFormula, outputError;
+            outputA = document.getElementById("outputA");
+            outputB = document.getElementById("outputB");
+            outputC = document.getElementById("outputC");
+            outputU = document.getElementById("outputU");
+            AuB = document.getElementById("AuB");
+            AiB = document.getElementById("AiB");
+            AcU = document.getElementById("AcU");
+            AdB = document.getElementById("AdB");
+            outputFormula = document.getElementById("formula");
+            outputError = document.getElementById("error");
+
+            update();
+
+            // Function of update, starts on input
+            function update(){
+                // Collecting data from input
+                inputA = clear(document.getElementById("inputA").value.split(" "));
+                inputB = clear(document.getElementById("inputB").value.split(" "));
+                inputC = document.getElementById("inputC").value.split(" ");
+                inputU = document.getElementById("inputU").value.split(" ");
+                inputF = document.getElementById("inputF").value;
+                
+
+                // Data output
+                outputA.innerHTML = "{" + inputA + "}";
+                outputB.innerHTML = "{" + inputB + "}";
+                outputC.innerHTML = "{" + inputC + "}";
+                outputU.innerHTML = "{" + inputU + "}";
+
+                AuB.innerHTML = "{" + union(inputA, inputB) + "}";
+                AiB.innerHTML = "{" + intersection(inputA, inputB) + "}";
+                AcU.innerHTML = "{" + complement(inputA, inputU) + "}";
+                AdB.innerHTML = "{" + difference(inputA, inputB) + "}";
+
+                let sets = [inputA, inputB, inputC];
+                
+                outputFormula.innerHTML = "{" + calculate(sets, inputF) + "}";
+            }
+
+            // Function returns a set whith only unique elements
+            function clear(a){
+                let seen = {}, result = [], j = 0;
+                // Going through the array and select only unique elements 
+                for(let i = 0; i < a.length; i++) {
+                    if(seen[a[i]] !== 1) {
+                        seen[a[i]] = 1;
+                        result[j++] = a[i];
+                    }
+                }
+                return result;
+            }
+
+            // Union of 2 sets
+            function union(set1, set2){
+                let map, result;
+                map = {};
+                result = [];
+
+                // Filling an array of two sets in ascending order
+                for (let i = set1.length - 1; i >= 0; --i){
+                    map[set1[i]] = set1[i];
+                };
+                for (let i = set2.length - 1; i >= 0; --i){
+                    map[set2[i]] = set2[i];
+                };
+                // Output to result only filled array elements 
+                for (const n in map){
+                    if (map.hasOwnProperty(n)){
+                        result.push(map[n]);
+                    }
+                }
+                return result;
+            }
+
+            // Intersection of 2 sets
+            function intersection(set1, set2){
+                return set1.filter(value => set2.includes(value));
+            }
+
+            // Complement of 2 sets
+            function complement(set1, setU){
+                return setU.filter(value => !set1.includes(value));
+            }
+
+            // Difference of 2 sets
+            function difference(set1, set2){
+                return set2.filter(value => !set1.includes(value));
+            }
+
+            // Error message
+            function error(err){
+                outputError.innerHTML = err;
+            }
+
+            // Possible names of sets
+            const setNames = {
+                A: 0,
+                B: 1,
+                C: 2
+            };
+
+            // Calculate intersection, union or difference
+            function operate(formula) {
+                // Possible operations
+                let operations = {
+                    "I": intersection,
+                    "U": union,
+                    "-": difference
+                };
+
+                // Calculate intersection, union or difference
+                Object.entries(operations).forEach(([key, operation]) => {
+                    while (formula.indexOf(key) != -1) {
+                        const operationIndex = formula.indexOf(key);
+                        const firstSet = formula[operationIndex - 1];
+                        const secondSet = formula[operationIndex + 1];
+                        // Check if set is empty
+                        if(firstSet || secondSet){
+                            if(firstSet[0] == "" || secondSet[0] == ""){
+                                error("Error: Set can't be empty!");
+                                break;
+                            }
+                        }
+                        error("");
+
+                        const newSet = operation(firstSet, secondSet);
+                        formula.splice(operationIndex - 1, 3, newSet);
+                    }
+                });
+
+                const result = formula[0];
+                return result;
+            }
+
+            function calculate(allSets, formula) {
+                if(!formula)
+                    return "";
+
+                // Removing spaces 
+                formula = formula.replace(/ +/g, "");
+
+                // Setting of start index of formula
+                let index = -1;
+
+                // Parse formula to separate elements
+                function parse(){
+                    const parsed = [];
+
+                    // Possible operations
+                    let operations = {
+                        "I": intersection,
+                        "U": union,
+                        "-": difference
+                    };
+
+                    while (true) {
+                        index++;
+
+                        // If formula ended
+                        if (index >= formula.length || formula[index] === ")") {
+                            return parsed;
+                        }
+
+                        // Current formula element
+                        const element = formula[index];
+
+                        // Possible elements
+                        if (setNames[element] !== undefined) {
+                            const setNumber = setNames[element];
+
+                            parsed.push(allSets[setNumber]);
+                        }
+
+                        // Possible operations
+                        if (operations[element]) {
+                            parsed.push(element);
+                        }
+
+                        // If bracket
+                        if (element === "(") {
+                            const parsedBrackets = parse();
+                            const resultInBrackets = operate(parsedBrackets);
+
+                            parsed.push(resultInBrackets);
+                        }
+
+                        // If complement
+                        if (element === "~") {
+                            index++;
+
+                            const parsedBrackets = parse();
+                            const resultInBrackets = operate(parsedBrackets);
+                            const complementResult = complement(
+                                resultInBrackets,
+                                inputU
+                            );
+
+                            parsed.push(complementResult);
+                        }
+                    }
+                };
+
+                const parsed = parse();
+                const result = operate(parsed);
+
+                return result;
+            }
+		</script>
+	</body>
+</html>
